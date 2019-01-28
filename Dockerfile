@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM ubuntu:bionic
 
 # environment settings
 ARG DEBIAN_FRONTEND="noninteractive"
