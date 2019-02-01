@@ -1,10 +1,14 @@
-FROM alpine:edge as fetch-stage
+ARG UBUNTU_VER="bionic"
+FROM ubuntu:${UBUNTU_VER} as fetch-stage
+
+# set environment variables
+ARG DEBIAN_FRONTEND="noninteractive"
 
 # install fetch packages
 RUN \
-	apk add --no-cache \
-		curl \
-		tar 
+	apt-get update \
+	&& apt-get install -y \
+		curl
 
 # fetch comskip source code
 RUN \
@@ -12,14 +16,14 @@ RUN \
 	&& mkdir -p \ 
 		/tmp/comskip-src \
 	&& COMSKIP_COMMIT=$(curl -sX GET "https://api.github.com/repos/erikkaashoek/Comskip/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]') \
+		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) \
 	&& curl -o \
 	/tmp/comskip.tar.gz -L \
 	"https://github.com/erikkaashoek/Comskip/archive/${COMSKIP_COMMIT}.tar.gz" \
 	&& tar xf \
 	/tmp/comskip.tar.gz -C \
 	/tmp/comskip-src --strip-components=1 \
-	&& echo "COMSKIP_VERSION=${COMSKIP_COMMIT:0:7}" > /tmp/version.txt
+	&& echo "COMSKIP_COMMIT=${COMSKIP_COMMIT}" > /tmp/version.txt
 
 # fetch ffmpeg source code
 RUN \
@@ -27,16 +31,16 @@ RUN \
 	&& mkdir -p \ 
 		/tmp/ffmpeg-src \
 	&& FFMPEG_COMMIT=$(curl -sX GET "https://api.github.com/repos/FFmpeg/FFmpeg/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]') \
+		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) \
 	&& curl -o \
 	/tmp/ffmpeg.tar.gz -L \
 	"https://github.com/FFmpeg/FFmpeg/archive/${FFMPEG_COMMIT}.tar.gz" \
 	&& tar xf \
 	/tmp/ffmpeg.tar.gz -C \
 	/tmp/ffmpeg-src --strip-components=1 \
-	&& echo "FFMPEG_VERSION=${FFMPEG_COMMIT:0:7}" >> /tmp/version.txt
+	&& echo "FFMPEG_COMMIT=${FFMPEG_COMMIT}" >> /tmp/version.txt
 
-FROM ubuntu:bionic
+FROM ubuntu:${UBUNTU_VER}
 
 # environment settings
 ARG DEBIAN_FRONTEND="noninteractive"
@@ -85,7 +89,7 @@ RUN \
 	&& make \
 	&& make install \
 	&& strip --strip-all /tmp/bin/comskip \
-	&& tar -czvf /build/ffmpeg-${FFMPEG_VERSION}-comskip-${COMSKIP_VERSION}.tar.gz -C /tmp/bin comskip
+	&& tar -czvf /build/ffmpeg-${FFMPEG_COMMIT}-comskip-${COMSKIP_COMMIT}.tar.gz -C /tmp/bin comskip
 
 # copy files out to /mnt
 CMD ["cp", "-avr", "/build", "/mnt/"]
