@@ -70,7 +70,7 @@ RUN \
 	&& cd /tmp/ffmpeg-src \
 	&& ./configure \
 		--disable-programs \
-		--prefix=/tmp/comskipbuild/install \
+		--prefix=/tmp/ffmpeg-build/install \
 	&& make \
 	&& make install
 
@@ -82,14 +82,13 @@ RUN \
 		/build \
 	&& cd /tmp/comskip-src \
 	&& ./autogen.sh \
-	&& PKG_CONFIG_PATH=/tmp/comskipbuild/install/lib/pkgconfig ./configure \
-		--bindir=/tmp/bin \
+	&& PKG_CONFIG_PATH=/tmp/ffmpeg-build/install/lib/pkgconfig ./configure \
+		--bindir=/tmp/comskip-build \
 		--enable-static \
-		--sysconfdir=/config/comskip \
 	&& make \
 	&& make install \
-	&& strip --strip-all /tmp/bin/comskip \
-	&& tar -czvf /build/ffmpeg-${FFMPEG_COMMIT}-comskip-${COMSKIP_COMMIT}.tar.gz -C /tmp/bin comskip
+	&& strip --strip-all /tmp/comskip-build/comskip \
+	&& tar -czvf /build/ffmpeg-${FFMPEG_COMMIT}-comskip-${COMSKIP_COMMIT}.tar.gz -C /tmp/comskip-build comskip
 
 # copy files out to /mnt
 CMD ["cp", "-avr", "/build", "/mnt/"]
