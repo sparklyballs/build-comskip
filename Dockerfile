@@ -14,6 +14,7 @@ RUN \
 	--no-install-recommends \
 		ca-certificates \
 		curl \
+		jq \
 	\
 # cleanup
 	\
@@ -31,10 +32,12 @@ RUN \
 	&& mkdir -p \ 
 		/tmp/comskip-src \
 		/tmp/ffmpeg-src \
-	&& COMSKIP_COMMIT=$(curl -sX GET "https://api.github.com/repos/erikkaashoek/Comskip/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) || : \
-	&& FFMPEG_COMMIT=$(curl -sX GET "https://api.github.com/repos/FFmpeg/FFmpeg/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) || : \
+	&& COMSKIP_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/erikkaashoek/Comskip/commits/master" \
+		| jq '.sha'| xargs) \
+	&& FFMPEG_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/FFmpeg/FFmpeg/commits/master" \
+		| jq '.sha'| xargs) \
+	&& COMSKIP_COMMIT="${COMSKIP_RAW_COMMIT:0:7}" \
+	&& FFMPEG_COMMIT="${FFMPEG_RAW_COMMIT:0:7}" \
 	&& curl -o \
 	/tmp/comskip.tar.gz -L \
 	"https://github.com/erikkaashoek/Comskip/archive/${COMSKIP_COMMIT}.tar.gz" \
