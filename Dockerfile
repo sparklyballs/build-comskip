@@ -35,7 +35,7 @@ RUN \
 	&& COMSKIP_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/erikkaashoek/Comskip/commits/master" \
 		| jq '.sha'| xargs) \
 	&& FFMPEG_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/FFmpeg/FFmpeg/commits/master" \
-		| jq '.sha'| xargs) \
+		| jq -r '.sha') \
 	&& COMSKIP_COMMIT="${COMSKIP_RAW_COMMIT:0:7}" \
 	&& FFMPEG_COMMIT="${FFMPEG_RAW_COMMIT:0:7}" \
 	&& curl -o \
