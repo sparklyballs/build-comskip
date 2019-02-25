@@ -14,7 +14,6 @@ RUN \
 	--no-install-recommends \
 		ca-certificates \
 		curl \
-		jq \
 	\
 # cleanup
 	\
@@ -26,18 +25,21 @@ RUN \
 # set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# fetch source code
+# fetch version file
 RUN \
 	set -ex \
+	&& curl -o \
+	/tmp/version.txt -L \
+	"https://raw.githubusercontent.com/sparklyballs/versioning/master/version.txt"
+
+# fetch source code
+# hadolint ignore=SC1091
+RUN \
+	. /tmp/version.txt \
+	&& set -ex \
 	&& mkdir -p \ 
 		/tmp/comskip-src \
 		/tmp/ffmpeg-src \
-	&& COMSKIP_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/erikkaashoek/Comskip/commits/master" \
-		| jq -r '.sha') \
-	&& FFMPEG_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/FFmpeg/FFmpeg/commits/master" \
-		| jq -r '.sha') \
-	&& COMSKIP_COMMIT="${COMSKIP_RAW_COMMIT:0:7}" \
-	&& FFMPEG_COMMIT="${FFMPEG_RAW_COMMIT:0:7}" \
 	&& curl -o \
 	/tmp/comskip.tar.gz -L \
 	"https://github.com/erikkaashoek/Comskip/archive/${COMSKIP_COMMIT}.tar.gz" \
@@ -49,9 +51,7 @@ RUN \
 	/tmp/comskip-src --strip-components=1 \
 	&& tar xf \
 	/tmp/ffmpeg.tar.gz -C \
-	/tmp/ffmpeg-src --strip-components=1 \
-	&& echo "COMSKIP_COMMIT=${COMSKIP_COMMIT}" > /tmp/version.txt \
-	&& echo "FFMPEG_COMMIT=${FFMPEG_COMMIT}" >> /tmp/version.txt
+	/tmp/ffmpeg-src --strip-components=1
 
 FROM ubuntu:${UBUNTU_VER} as ffmpeg-build-stage
 
