@@ -185,7 +185,7 @@ RUN \
 		/build \
 	&& strip --strip-all comskip \
 	&& tar -czvf /build/ffmpeg-"${FFMPEG_COMMIT}"-comskip-"${COMSKIP_COMMIT}".tar.gz comskip \
-	&& chown 1000:1000 /build/ffmpeg-"${FFMPEG_COMMIT}"-comskip-"${COMSKIP_COMMIT}".tar.gz
+	&& chown -R 1000:1000 /build
 
 # copy files out to /mnt
 CMD ["cp", "-avr", "/build", "/mnt/"]
