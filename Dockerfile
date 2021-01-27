@@ -1,4 +1,4 @@
-ARG UBUNTU_VER="bionic"
+ARG UBUNTU_VER="focal"
 FROM ubuntu:${UBUNTU_VER} as fetch-stage
 
 ############## fetch stage ##############
